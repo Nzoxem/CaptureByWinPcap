@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Struct Name="ether_header">
+    <Position X="6.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAQAA=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ip_address">
+    <Position X="0.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAACAQAAQAAAAA=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ip_header">
+    <Position X="2.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEQAAAAAAABAACAAAAAAAgAIAIAAAAEgAAIAAAAAAA=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="tcp_header">
+    <Position X="4.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAQAAAIAAAAAAAAAAAAAAAAAIAAIAAAQAAAACQAAQ=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="udp_header">
+    <Position X="11.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAIAAMAAAAAAAAAAAAA=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="icmp_header">
+    <Position X="10" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAIgIBAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="arp_header">
+    <Position X="8.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAEgAAAAAAAAAAICAAEAAAQAQAAAAAAAAg=</HashCode>
+      <FileName>source.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

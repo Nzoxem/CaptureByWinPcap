@@ -1,0 +1,16 @@
+﻿生成启动时间为 2018/3/22 14:03:29。
+     1>项目“F:\桌面\CODE\VS\WinpcapTs\WinpcapTs\WinpcapTs.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         F:\VS2013\安装目录\VC\bin\CL.exe /c /IF:\WpdPack\Include /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _WINDOWS /D _CRT_SECURE_NO_WARNINGS /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt capture.cpp
+         capture.cpp
+     1>capture.cpp(92): warning C4018: “<”: 有符号/无符号不匹配
+       Link:
+         F:\VS2013\安装目录\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\桌面\CODE\VS\WinpcapTs\Release\WinpcapTs.exe" /NOLOGO /LIBPATH:F:\WpdPack\Lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\桌面\CODE\VS\WinpcapTs\Release\WinpcapTs.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\桌面\CODE\VS\WinpcapTs\Release\WinpcapTs.lib" /MACHINE:X86 /SAFESEH Release\capture.obj
+         正在生成代码
+         已完成代码的生成
+         WinpcapTs.vcxproj -> F:\桌面\CODE\VS\WinpcapTs\Release\WinpcapTs.exe
+     1>已完成生成项目“F:\桌面\CODE\VS\WinpcapTs\WinpcapTs\WinpcapTs.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:00.81
