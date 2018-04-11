@@ -83,9 +83,147 @@ typedef struct arp_header{
 	u_char destination_ip_address[4];//目的方协议地址
 }arp_header;
 
+void handle_udp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+
+}
+void handle_tcp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+
+}
+void handle_icmp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+
+}
+void handle_arp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+
+}
+/*
+u_char version_hlen;	//首部长度、版本
+u_char tos;				//服务质量
+u_short tlen;			//总长度
+u_short identification;	//身份识别
+u_short flags_offset;	//标识 分组偏移
+u_char ttl;				//生存时间
+u_char proto;			//协议类型
+u_short checksum;		//头部校验和
+u_int saddr;			//源IP地址
+u_int daddr;			//目的IP地址
+*/
+void handle_ip_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+	ip_header *ip_protocol;
+	sockaddr_in source, dest;
+	char sourceIP[MAX_ADDR_LEN], destIP[MAX_ADDR_LEN];
+	ip_protocol = (ip_header*)(pkt_content + 14);
+	source.sin_addr.s_addr = ip_protocol->saddr;
+	dest.sin_addr.s_addr = ip_protocol->daddr;
+	strncpy(sourceIP, inet_ntoa(source.sin_addr), MAX_ADDR_LEN);
+	strncpy(destIP, inet_ntoa(dest.sin_addr), MAX_ADDR_LEN);
+
+	printf("===================IP Protocol==================\n");
+	printf("版本号: %d\n", ip_protocol->version_hlen >> 4);
+	printf("头部长度：%d bytes\n", (ip_protocol->version_hlen & 0x0f) * 4);//与00001111B按位与消除前四位后
+	printf("服务质量：%d\n", ip_protocol->tos);
+	printf("总长度：%d\n", ntohs(ip_protocol->tlen));
+	printf("身份识别：0x%.4x (%i) \n", ntohs(ip_protocol->identification), ntohs(ip_protocol->identification));
+	printf("标识：%d\n", ntohs(ip_protocol->flags_offset) >> 13);
+	printf("--保留位：%d\n", (ntohs(ip_protocol->flags_offset) & 0x8000) >> 15);
+	printf("---Don't fragment: %d\n", (ntohs(ip_protocol->flags_offset) & 0x4000) >> 14);
+	printf("---More fragment: %d\n", (ntohs(ip_protocol->flags_offset) & 0x2000) >> 13);
+	printf("分段偏移：%d\n", ntohs(ip_protocol->flags_offset) & 0x1fff);
+	printf("生存时间：%d\n", ip_protocol->ttl);
+	printf("协议类型：");
+	switch (ip_protocol->proto)
+	{
+	case 1:
+		printf("ICMP");
+		break;
+	case 6:
+		printf("TCP");
+		break;
+	case 17:
+		printf("UDP");
+
+	default:
+		break;
+	}
+	printf(" (%d)\n", ip_protocol->proto);
+	printf("头部校验和： 0x%.4x\n", ntohs(ip_protocol->checksum));
+	printf("源地址：%s\n", sourceIP);
+	printf("目的地址：%s\n", destIP);
+	if (ip_protocol->proto == htons(0x0600)){
+		handle_tcp_packet(arg, pkt_header, pkt_content);
+	}
+	else if (ip_protocol->proto == htons(0x1100)){
+		handle_udp_packet(arg, pkt_header, pkt_content);
+	}
+	else if (ip_protocol->proto == htons(0x0100)){
+		handle_icmp_packet(arg,pkt_header,pkt_content);
+	}
+
+}
+void handle_ethernet_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+	ether_header *ethernet_protocol;	//以太网协议
+	u_short ethernet_type;				//以太网类型
+	u_char	*mac_string;				//以太网地址
+	//获取以太网数据类型
+	ethernet_protocol = (ether_header*)pkt_content;
+	//将一个16位数由网络字节顺序转换为主机字节顺序 
+	ethernet_type = ntohs(ethernet_protocol->ether_type);
+	printf("==============Ethernet Protocol=================\n");
+	//以太网目标地址
+	mac_string = ethernet_protocol->ether_dhost;
+	printf("目标MAC地址：%02x:%02x:%02x:%02x:%02x:%02x:\n",
+		*mac_string,
+		*(mac_string + 1),
+		*(mac_string + 2),
+		*(mac_string + 3),
+		*(mac_string + 4),
+		*(mac_string + 5));
+	//以太网源地址
+	mac_string = ethernet_protocol->ether_shost;
+	printf("源MAC地址：%02x:%02x:%02x:%02x:%02x:%02x:\n",
+		*mac_string,
+		*(mac_string + 1),
+		*(mac_string + 2),
+		*(mac_string + 3),
+		*(mac_string + 4),
+		*(mac_string + 5));
+	printf("Ethernet type: ");
+	switch (ethernet_type)
+	{
+	case 0x0800:
+		printf("%s", "IP");
+		break;
+	case 0x0806:
+		printf("%s", "ARP");
+	case 0x0835:
+		printf("%s", "RARP");
+	default:
+		printf("%s", "Unknown Protocol");
+		break;
+	}
+	printf(" (0x%04)\n", ethernet_type);
+	switch (ethernet_type)
+	{
+	case 0x0800:
+		handle_ip_packet(arg, pkt_header, pkt_content);
+		break;
+	case 0x0806:
+		handle_arp_packet(arg, pkt_header, pkt_content);
+		break;
+	case 0x0835:
+		printf("==============RARP Protocol=================\n");
+		printf("RARP\n");
+		break;
+	default:
+		printf("==============Unknown Protocol==============\n");
+		printf("Unknown Protocol\n");
+		break;
+	}
+
+}
+
 
 int main(){
-	
+
 	pcap_if_t *alldevs;//pcap_if_t是一个链表的数据结构，表明网络接口的信息，
 	pcap_if_t *adapter;//保存某个适配器
 	pcap_t *fp;
@@ -112,7 +250,8 @@ int main(){
 		printf("%d. %s", ++i, adapter->name);
 		if (adapter->description){
 			printf("(%s)\n", adapter->description);
-		}else{
+		}
+		else{
 			printf(" (No description)\n ");
 		}
 	}
@@ -150,7 +289,7 @@ int main(){
 	if ((file = freopen("data.txt", "w", stdout)) == 0){
 		printf("无法打开文档。/n");
 	}
-	while ((res=pcap_next_ex(fp,&header,&pkt_data)) >= 0)
+	while ((res = pcap_next_ex(fp, &header, &pkt_data)) >= 0)
 	{
 		if (res == 0){
 			//超时的情况
@@ -161,15 +300,16 @@ int main(){
 		ltime = localtime(&local_tv_sec);
 		strftime(timestr, sizeof(timestr), "%H:%M:%S", ltime);
 		//输出抓取的包的编号、时间、长度
-		printf("NO.%d\ttime: %s\tlen:%ld\n",count++,timestr,header->len);
+		printf("NO.%d\ttime: %s\tlen:%ld\n", count++, timestr, header->len);
 		char temp[LINE_LEN + 1];
 		//输出包
-		for ( i = 0; i < header->caplen; i++)
+		for (i = 0; i < header->caplen; i++)
 		{	//以十六进制输出
 			printf("%.2x ", pkt_data[i]);
 			if (isgraph(pkt_data[i]) || pkt_data[i] == ' '){
 				temp[i%LINE_LEN] = pkt_data[i];
-			}else{
+			}
+			else{
 				temp[i%LINE_LEN] = '.';
 			}
 			if (i%LINE_LEN == 15){
@@ -182,6 +322,7 @@ int main(){
 		}
 		printf("\n");
 		//分析数据包
+
 	}
 
 	if (res == -1){
