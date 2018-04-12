@@ -82,20 +82,143 @@ typedef struct arp_header{
 	u_char destination_ethernet_address[6];//目的方硬件地址
 	u_char destination_ip_address[4];//目的方协议地址
 }arp_header;
+/*
+UDP协议处理解析
+u_short sport;			//源端口号
+u_short dport;			//目的端口号
+u_short datalen;		//数据长度
+u_short checksum;		//校验和
+*/
 
 void handle_udp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
-
-}
-void handle_tcp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
-
-}
-void handle_icmp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
-
-}
-void handle_arp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
-
+	udp_header *udp_protocol;
+	udp_protocol = (udp_header*)(pkt_content + 14 + 20);
+	printf("===================UDP Protocol=================\n");
+	printf("源端口号：%i\n", ntohs(udp_protocol->sport));
+	printf("目的端口号：%i\n", ntohs(udp_protocol->dport));
+	printf("数据长度:%i\n", ntohs(udp_protocol->datalen));
+	printf("校验和：0x%.4x\n", ntohs(udp_protocol->checksum));
 }
 /*
+TCP协议处理解析
+u_short sport;			//源端口号
+u_short dport;			//目的端口号
+u_int sequence;			//序列码
+u_int ack;				//回复码
+u_char hdrLen;			//首部长度 保留字
+u_char flags;			//标志
+u_short windows;		//窗口大小
+u_short checksum;		//校验和
+u_short urgent_p;		//紧急指针
+*/
+void handle_tcp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+	tcp_header *tcp_protocol;
+	tcp_protocol = (tcp_header*)(pkt_content + 14 + 20);
+	printf("===================TCP Protocol=================\n");
+	printf("源端口号：%i\n", ntohs(tcp_protocol->sport));
+	printf("目的端口号：%i\n", ntohs(tcp_protocol->dport));
+	printf("序列码：%d\n", ntohl(tcp_protocol->sequence));
+	printf("回复码: %d\n", ntohl(tcp_protocol->ack));
+	printf("头部长度：%d\n", (tcp_protocol->hdrLen >> 4) * 4);
+	printf("标志：0x%.3x", tcp_protocol->flags);
+	if (tcp_protocol->flags & 0x08) printf("(PSH)");
+	if (tcp_protocol->flags & 0x10) printf("(ACK)");
+	if (tcp_protocol->flags & 0x02) printf("(SYN)");
+	if (tcp_protocol->flags & 0x20) printf("(URG)");
+	if (tcp_protocol->flags & 0x01) printf("(FIN)");
+	if (tcp_protocol->flags & 0x04) printf("(RST)");
+	printf("\n");
+	printf("窗口大小：%i\n", ntohs(tcp_protocol->windows));
+	printf("校验和：0x%.4x\n", ntohs(tcp_protocol->checksum));
+	printf("紧急指针：%i\n", ntohs(tcp_protocol->urgent_p));
+}
+// ICMP协议处理
+//u_char type;				// ICMP类型
+//u_char code;				// 代码
+//u_short checksum;			// 校验和
+//u_short identification;	// 标识
+//u_short sequence;			// 序列号
+//u_long timestamp;			// 时间戳
+void handle_icmp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+	icmp_header *icmp_protocol;
+	icmp_protocol = (icmp_header*)(pkt_content + 14 + 20);
+	printf("==================ICMP Protocol=================\n");
+	printf("类型: %d", icmp_protocol->type);
+	switch (icmp_protocol->type)
+	{
+		case 8:
+			printf("(request)\n");
+			break;
+		case 0:
+			printf("(reply)\n");
+			break;
+		default:
+			printf("\n");
+			break;
+	}
+	printf("代码：%d\n", icmp_protocol->code);
+	printf("校验和: 0x%.4x\n", ntohs(icmp_protocol->checksum));
+	printf("标识：0x%.4x\n", ntohs(icmp_protocol->identification));
+	printf("序列号：0x%.4x\n", ntohs(icmp_protocol->sequence));
+}
+// ARP协议解析处理
+//u_short hardware_type;					// 格式化的硬件地址
+//u_short protocol_type;					// 协议地址格式
+//u_char hardware_length;					// 硬件地址长度
+//u_char protocol_length;					// 协议地址长度
+//u_short operation_code;					// 操作码
+//u_char source_ethernet_address[6];		// 发送者硬件地址
+//u_char source_ip_address[4];				// 发送者协议地址
+//u_char destination_ethernet_address[6];	// 目的方硬件地址
+//u_char destination_ip_address[4];			// 目的方协议地址
+void handle_arp_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u_char *pkt_content){
+	arp_header *arp_protocol;
+	arp_protocol = (arp_header*)(pkt_content+14);
+	printf("==================ARP Protocol==================\n");
+	printf("硬件地址：");
+	switch (ntohs(arp_protocol->hardware_type))
+	{
+		case 1:
+			printf("Ethernet");
+			break;
+		default:
+			break;
+	}
+	printf("(%d)\n", ntohs(arp_protocol->hardware_type));
+	printf("协议地址格式：");
+	switch (ntohs(arp_protocol->protocol_type))
+	{
+		case 0x0800:
+			printf("%s", "IP");
+			break;
+		case 0x0806:
+			printf("%s", "ARP");
+			break;
+		case 0x0835:
+			printf("%s", "RARP");
+			break;
+		default:
+			printf("%s", "Unknown Protocol");
+			break;
+	}
+	printf("(0x%04x)\n", ntohs(arp_protocol->protocol_type));
+	printf("硬件地址长度：%d\n", arp_protocol->hardware_length);
+	printf("协议地址长度：%d\n", arp_protocol->protocol_length);
+	printf("操作码：");
+	switch (ntohs(arp_protocol->operation_code))
+	{
+		case 1:
+			printf("request");
+			break;
+		case 2:
+			printf("reply");
+		default:
+			break;
+	}
+	printf("(%i)\n", ntohs(arp_protocol->operation_code));
+}
+/*
+IP协议解析处理
 u_char version_hlen;	//首部长度、版本
 u_char tos;				//服务质量
 u_short tlen;			//总长度
@@ -124,7 +247,7 @@ void handle_ip_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, const u
 	printf("总长度：%d\n", ntohs(ip_protocol->tlen));
 	printf("身份识别：0x%.4x (%i) \n", ntohs(ip_protocol->identification), ntohs(ip_protocol->identification));
 	printf("标识：%d\n", ntohs(ip_protocol->flags_offset) >> 13);
-	printf("--保留位：%d\n", (ntohs(ip_protocol->flags_offset) & 0x8000) >> 15);
+	printf("---保留位：%d\n", (ntohs(ip_protocol->flags_offset) & 0x8000) >> 15);
 	printf("---Don't fragment: %d\n", (ntohs(ip_protocol->flags_offset) & 0x4000) >> 14);
 	printf("---More fragment: %d\n", (ntohs(ip_protocol->flags_offset) & 0x2000) >> 13);
 	printf("分段偏移：%d\n", ntohs(ip_protocol->flags_offset) & 0x1fff);
@@ -194,13 +317,15 @@ void handle_ethernet_packet(u_char *arg, const struct pcap_pkthdr *pkt_header, c
 		break;
 	case 0x0806:
 		printf("%s", "ARP");
+		break;
 	case 0x0835:
 		printf("%s", "RARP");
+		break;
 	default:
 		printf("%s", "Unknown Protocol");
 		break;
 	}
-	printf(" (0x%04)\n", ethernet_type);
+	printf(" (0x%04x)\n", ethernet_type);
 	switch (ethernet_type)
 	{
 	case 0x0800:
@@ -264,7 +389,7 @@ int main(){
 	{
 		printf("请选择适配器编号（1-%d): ", i);
 		scanf("%d", &inum);
-		if (inum > 0 && inum < i){
+		if (inum > 0 && inum <= i){
 			break;
 		}
 	}
@@ -300,7 +425,9 @@ int main(){
 		ltime = localtime(&local_tv_sec);
 		strftime(timestr, sizeof(timestr), "%H:%M:%S", ltime);
 		//输出抓取的包的编号、时间、长度
+		printf("==============================================================================\n");
 		printf("NO.%d\ttime: %s\tlen:%ld\n", count++, timestr, header->len);
+		printf("==============================================================================\n");
 		char temp[LINE_LEN + 1];
 		//输出包
 		for (i = 0; i < header->caplen; i++)
@@ -322,7 +449,7 @@ int main(){
 		}
 		printf("\n");
 		//分析数据包
-
+		handle_ethernet_packet(NULL, header, pkt_data);
 	}
 
 	if (res == -1){
